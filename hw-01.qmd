@@ -2,25 +2,317 @@
 title: "HW 01"
 author: "Hariharan Ramesh"
 format: html
-toc: true
+toc: true  
 ---
 
 ## 1 - Road traffic accidents in Edinburgh
 
 ```{r label-me-1}
+library(ggplot2)
+library(dsbox)
+library("viridis")
+library(dplyr)
+
+accidents <- accidents |>
+  mutate(
+    day_type = case_when(
+      day_of_week %in% c("Saturday", "Sunday") ~ "Weekend",
+      day_of_week %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday") ~ "Weekday"
+    )
+  )
+
+ggplot() +
+  geom_density(data = subset(accidents, day_type == "Weekday"), aes(x = time, fill = severity), alpha = 0.4) +
+  geom_density(data = subset(accidents, day_type == "Weekend"), aes(x = time, fill = severity), alpha = 0.4) +
+  labs(
+    title = "Number of accidents throughout the day",
+    subtitle = "By day of week and severity",
+    x = "Time of day",
+    y = "Density"
+  ) +
+  facet_wrap(~day_type, ncol = 1) +
+  theme_minimal() + 
+  scale_fill_viridis(discrete = TRUE)
+
 
 ```
+The above plot shows the density plot of the number of accidents happened over weekends and weekdays along with the severity.
+From the plot we can infer that there were no fatal accidents during the weekends. We can also see that majority of the accidents happens from 12:00 to 16:00 during the weekends.
+
 
 ## 2 - NYC marathon winners
 
 ```{r label-me-2}
+library(openintro)
+library(ggplot2)
+?nyc_marathon
+
+# a)
+#> With the  box plot it is easier for us to identify the median , outlier, spread as well as the extent and nature of departures from symmetry. 
+#> But with the histogram it is easier to visualise the distribution of the data, it indicats whether the data is symmetrical or skewed 
+#> We can see from the box plot that the median time is approximately 2:23 and from the histogram we can infer that the data is positively skewed
+
+ggplot(
+  data = nyc_marathon, 
+  aes(x = time)
+  ) +
+  geom_histogram() +
+  labs(
+    x = "Marathon time",
+    title = "Histogram of marathon time"
+  )
+
+ggplot(
+  data = nyc_marathon, 
+  aes(x = time)
+  ) +
+  geom_boxplot() +
+  labs(
+    x = "Marathon time",
+    title = "Boxplot of marathon time"
+  )
+
+# b)
+ggplot(data = nyc_marathon, aes(x = time, color = division)) +
+  geom_boxplot() +
+  facet_wrap(~division, ncol = 1) +
+  scale_color_manual(values = c("green2", "deepskyblue3")) +
+  labs(
+    x = "Marathon time",
+    color = "division",
+    title = "Boxplot of marathon time for men and women"
+  )
+# From the above plots, it is clear that the median, minimum time taken and maximum time taken is greater for women when compared to men. We can also say that the standard deviation of women is little bit higher that men because the box plot is slightly spread out for women.
+
+# c)
+
+
+# d)
+ggplot(data = nyc_marathon, aes(x = year, y = time, color = division)) +
+  geom_point() +
+  facet_wrap(~division) +
+  scale_color_manual(values = c("green2", "deepskyblue3")) +
+  labs(
+    x = "Years",
+    y = "Marathon time",
+    color = "division",
+    title = "Timeseries plot of marathon time for men and women"
+  )
+
 
 ```
 
 ## 3 - US counties
 
+a) The given code tries to make a box plot and a scatter plot in a single plot. Combining a scatter plot and a box plot on the same plot may not provide meaningful visualizations since they typically use different scales and representations. Moreover, the x and y axes for both the plots represent different data, making it impossible to be represented in a single plot.
+
+b) Since the poverty level is represented by the y-axis, it would be better to have longer y-axis to when compared to x-axis. Clearly, the second plot makes it easier to compare the poverty levels across people from different median education levels because here the plots are faceted across the columns giving enough space for the y-axis and here the vertical scales are aligned unlike the first graph which is faceted across rows, making it difficult to view the data distribution across the y-axis(poverty level).
+The data is well distributed across the y-axis in the second graph, and it is well distributed across the x-axis in the first graph. Since our focus is on the y-axis, the second graph is preffered over the first.
+Accordingly, if we were to compare the home ownership rate instead of the poverty level, then the first graph would be preffered. 
+So if we give more importance to the data mapped to the y-axis, the faceting should be done across columns and if we give more importance to the data mapped to the x-axis, the faceting should be done across rows.
+
+c)
+```{r label-me-3}
+library(ggpubr)
+a <- ggplot(county, aes(x = homeownership, y = poverty)) + 
+  geom_point() + 
+  labs(
+    title = "Plot A"
+  )
+
+
+b <- ggplot(county, aes(x = homeownership, y = poverty)) + 
+  geom_point() +
+  geom_smooth(method = "gam", se = FALSE) + 
+  labs(
+    title = "Plot B"
+  ) 
+
+
+c <-ggplot(county, aes(x = homeownership, y = poverty)) + 
+  geom_point() +
+  geom_smooth(method = "gam", se = FALSE, aes(group = metro),color = "green") + 
+  labs(
+    title = "Plot C"
+  )
+
+
+d <- ggplot(county, aes(x = homeownership, y = poverty)) + 
+  geom_smooth(method = "gam", se = FALSE, aes(group = metro)) +
+  geom_point() + 
+  labs(
+    title = "Plot D"
+  )
+
+
+e <- ggplot(county, aes(x = homeownership, y = poverty)) + 
+  geom_point(aes(color = metro)) +
+  geom_smooth(method = "gam", se = FALSE, aes(group = metro, linetype = metro)) + 
+  labs(
+    title = "Plot E"
+  ) 
+
+f <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) + 
+  geom_point() +
+  geom_smooth(method = "gam", se = FALSE) + 
+  labs(
+    title = "Plot F"
+  ) 
+
+g <- ggplot(county, aes(x = homeownership, y = poverty)) + 
+  geom_point(aes(color = metro)) +
+  geom_smooth(method = "gam", se = FALSE) + 
+  labs(
+    title = "Plot G"
+  ) 
+
+h <- ggplot(county, aes(x = homeownership, y = poverty)) + 
+  geom_point(aes(color = metro)) +
+  labs(
+    title = "Plot H"
+  ) 
+
+ggarrange(a, b, c ,d, 
+          ncol = 2, nrow = 2)
+
+ggarrange(e, f, g, h,
+          ncol = 2, nrow = 2)
+```
 
 ## 4 - Rental apartments in SF
+I first filter the data by taking only the city of San fransisco and rentals where the full unit is available.
+Since it is given that only 8 neighborhoods can be chosen, I compute the median rental prices per bedroom for each neighborhood and year and select the top 8 neighbourhood based on median price. Then I modified the data accordingly by changing the rest of the nhood values to "Other".
+
+```{r label-me-4}
+rent <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-05/rent.csv')
+
+# Filtering the data for San Francisco and full unit availability
+sf_rent_data <- rent %>%
+  filter(city == "san francisco" & room_in_apt == 0)
+
+# Calculating median rental prices per bedroom for each neighborhood and year
+median_prices <- sf_rent_data %>%
+  group_by(nhood, year) %>%
+  summarise(median_price_per_bed = median(price / beds)) %>%
+  ungroup()
+
+# Selecting the top 8 neighborhoods by median price
+top_neighborhoods <- median_prices %>%
+  group_by(nhood) %>%
+  summarise(median_price = median(median_price_per_bed)) %>%
+  arrange(desc(median_price)) %>%
+  slice(1:8) %>%
+  pull(nhood)
 
 
-## 5 - Napoleon’s march.
+# Filtering the data to include only the top neighborhoods and "Other"
+sf_rent_data <- sf_rent_data %>%
+  mutate(nhood = ifelse(nhood %in% top_neighborhoods, as.character(nhood), "Other"))
+
+# Creating the plot
+ggplot(sf_rent_data, aes(x = year, y = price/beds, color = nhood)) +
+  geom_point(position = position_jitterdodge()) +
+  scale_color_brewer(palette = "Set2") +
+  labs(
+    title = "Distribution of Rental Prices per Bedroom",
+    x = "Year",
+    y = "Price per Bedroom",
+    fill = "Neighborhood"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```
+I have used a jitterplot with dodge here because the the jitter plot clearly shows how the rental price changes over the year and the dodge helps us compare the differnet neighboods as each of them are seperated which makes it easier to compare.
+Using just a geom_point or geom_jitter wouldn't be so helpful because all the datapoints will be overlapping with eachother.
+
+From the plot we can see that SOMA/ south beach has a relatively higher price per bedroom when compared to the rest of the neighbors and CCSF has a relatively lower price per bedroom. And we can also see that the prices have pnly increasedd slightly over the years.
+Majority of the price range lies between 0 to 5000.
+
+## 5 - Napoleon's march.
+The dataset provides information regarding Napoleon's troop strength at specific geographical points (latitude and longitude) along his campaign route. This data includes the number of survivors and is categorized by direction, with two levels: "Advance" (A) and "Retreat" (R). Additionally, it is grouped based on the three generals who commanded different portions of Napoleon's troops.
+
+The graph comprises two distinct plots arranged one above the other, a plot displaying troop strength, represented by (x, y) coordinates, where 'x' corresponds to latitude and 'y' corresponds to longitude and a separate plot showcasing temperature data, with coordinates involving temperature (temp) and longitude (long).
+And the graph of troop strength has two layers, a path connecting the (x, y) coordinates, with the width of the path being proportional to the number of survivors at each point, text labels on the map that correspond to the cities mentioned in the dataset, which can be found in the 'Minard.cities' dataset.
+Here I have used geom_path() to plot the path and mapped the size attribute to survivors so that the width of the path will represent the troop strength at that point.
+I have mapped the color to directions to differentiate between advance and retreat.
+I used a color picker to find the hex code of the color closest to the original
+
+```{r label-me-5}
+library(ggplot2)
+library(scales)        # additional formatting for scales
+library(grid)          # combining plots
+library(gridExtra)     # combining plots
+library(dplyr)         # tidy data manipulations
+library(ggrepel)       # for plotting text without overlap
+
+knitr::opts_chunk$set(
+  fig.height=3.5, fig.width=10
+)
+
+Minard <- readr::read_rds("data/napoleon.rds")
+breaks <- c(1, 2, 3) * 10^5 
+plot_troops <-ggplot(Minard$troops, aes(long, lat)) +
+  geom_path(aes(size = survivors, colour = direction, group = group),
+            lineend="round") +
+  scale_size("Survivors", range = c(1,10), #c(0.5, 15),
+             breaks=breaks, labels=scales::comma(breaks)) +
+  scale_color_manual("Direction", 
+                     values = c("#EED7B2", "#1F1A1B"), 
+                     labels=c("Advance", "Retreat")) 
+```
+Since the original plot doesn't have legends, labels and scales for the horizontal and vertical axes, I have dropped them and used thteme_void() to get rid of the grey background and grids.
+I used geom_point() to plot city locations, and/or geom_text_repel() to plot their names from the cities datset.
+```{r label-me-6}
+
+plot_troops <- plot_troops + labs(x = NULL, y = NULL) + 
+  theme_void() + 
+  guides(color = FALSE, size = FALSE) +
+  geom_point(data = Minard$cities) +
+  geom_text_repel(data = Minard$cities, aes(label = city)) +
+  coord_cartesian(xlim = c(24, 38)) 
+```
+Temperature plot
+
+It is the plot of temperature against longitude on the path of the retreat.
+This can also be constructed using geon_path and geom_path to highlight the points.
+In Minard’s graph, he labeled each point using the temperature and the date, in a particular format. So i have constructed on my own.
+
+```{r label-me-7}
+knitr::opts_chunk$set(
+  fig.height=1.2, fig.width=10
+)
+Minard$temp <- Minard$temp %>%
+  mutate(label = paste0(temp, "° ", date))
+
+plot_temp <- ggplot(Minard$temp, aes(long, temp)) +
+  geom_path(color="grey", size=1.5) +
+  geom_point(size=1) +
+  geom_text_repel(aes(label=label), size=2.5)
+```
+Suppressing the horizontal axis tick marks and labels to make it look as close to the original as possible
+```{r label-me-8}
+
+plot_temp <- plot_temp +  
+  coord_cartesian(xlim = c(24, 38)) +
+  labs(x = NULL, y="Temperature") + 
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_blank(), axis.ticks = element_blank(),
+        panel.border = element_blank())
+
+grid.arrange(plot_troops, plot_temp, nrow=2, heights=c(3.5, 1.2))
+grid.rect(width = .99, height = .99, gp = gpar(lwd = 2, col = "gray", fill = NA))
+
+
+```
+
+## 6 - Citation.
+https://ggplot2-book.org/facet
+https://www.kaggle.com/code/deepdk/rental-prices-in-sf-tidytuesday/notebook
+https://www.datanovia.com/en/blog/top-r-color-palettes-to-know-for-great-data-visualization/
+https://htmlcolorcodes.com/color-picker/
+http://euclid.psych.yorku.ca/www/psy6135/tutorials/Minard.html
+
