@@ -85,7 +85,17 @@ ggplot(data = nyc_marathon, aes(x = time, color = division)) +
 # From the above plots, it is clear that the median, minimum time taken and maximum time taken is greater for women when compared to men. We can also say that the standard deviation of women is little bit higher that men because the box plot is slightly spread out for women.
 
 # c)
-
+ggplot(data = nyc_marathon, aes(x = time, color = division)) +
+  geom_boxplot() +
+  scale_color_manual(values = c("green2", "deepskyblue3")) +
+  labs(
+    x = "Marathon time",
+    color = "division",
+    title = "Boxplot of marathon time for men and women"
+  )
+#> Since both the plots above have the same x and y-axes, it is redundant to make two plots. Both facets and colors are playing the same role. We can instead make both the boxplots in a single plot differentiating them through colors. 
+#> This way we have more data in a single plot thus leading to an increase in the data to ink ratio.
+#> 
 
 # d)
 ggplot(data = nyc_marathon, aes(x = year, y = time, color = division)) +
@@ -270,7 +280,10 @@ plot_troops <- plot_troops + labs(x = NULL, y = NULL) +
   guides(color = FALSE, size = FALSE) +
   geom_point(data = Minard$cities) +
   geom_text_repel(data = Minard$cities, aes(label = city)) +
-  coord_cartesian(xlim = c(24, 38)) 
+  coord_cartesian(xlim = c(24, 38)) +
+  labs(
+    title = "Napolean's march"
+  )
 ```
 Temperature plot
 
