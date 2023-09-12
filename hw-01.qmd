@@ -190,8 +190,8 @@ ggarrange(e, f, g, h,
 ```
 
 ## 4 - Rental apartments in SF
-I first filter the data by taking only the city of San fransisco and rentals where the full unit is available.
-Since it is given that only 8 neighborhoods can be chosen, I compute the median rental prices per bedroom for each neighborhood and year and select the top 8 neighbourhood based on median price. Then I modified the data accordingly by changing the rest of the nhood values to "Other".
+I first filter the data by taking only the city of San francisco and rentals where the full unit is available.
+Since it is given that only 8 neighborhoods can be chosen, instead of randomly taking 8 neighborhoods I compute the median rental prices per bedroom for each neighborhood and year and select the top 8 neighborhood based on median price. Then I modified the data accordingly by changing the rest of the nhood values to "Other".
 
 ```{r label-me-4}
 rent <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-05/rent.csv')
@@ -221,7 +221,8 @@ sf_rent_data <- sf_rent_data %>%
 
 # Creating the plot
 ggplot(sf_rent_data, aes(x = year, y = price/beds, color = nhood)) +
-  geom_point(position = position_jitterdodge()) +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~nhood) +
   scale_color_brewer(palette = "Set2") +
   labs(
     title = "Distribution of Rental Prices per Bedroom",
@@ -233,11 +234,11 @@ ggplot(sf_rent_data, aes(x = year, y = price/beds, color = nhood)) +
   theme(legend.position = "bottom")
 
 ```
-I have used a jitterplot with dodge here because the the jitter plot clearly shows how the rental price changes over the year and the dodge helps us compare the differnet neighboods as each of them are seperated which makes it easier to compare.
-Using just a geom_point or geom_jitter wouldn't be so helpful because all the datapoints will be overlapping with eachother.
+Since we are tasked with comparing the distribution of rental prices per bedroom,  I have chosen the geom_smooth plot. This allows me to clearly visualize the pattern in the data unlike some of the other plots that I tried such as geom_point, geom_boxplot, geom_line, etc. The output of geom_line was so difficult to interpret because of the sharp ups and downs, but the geom_smooth makes it better by smoothing it out, which helps us see the trend very clearly. Unlike other plots which give us unwanted information, geom_smooth gives only the required information that is needed to make the comparison.
 
-From the plot we can see that SOMA/ south beach has a relatively higher price per bedroom when compared to the rest of the neighbors and CCSF has a relatively lower price per bedroom. And we can also see that the prices have pnly increasedd slightly over the years.
-Majority of the price range lies between 0 to 5000.
+From the above plot it is clear that the price per bedroom have been increasing for all the neighborhoods over the years. We can see that SOMA/ south beach has the highest increase and USF/anza vista has the lowest increase in price per bedroom.
+We can also infer that CCSF has the lowest price per bedroom over the years and SOMA/south beach has the highest price per bedroom.
+
 
 ## 5 - Napoleon's march.
 The dataset provides information regarding Napoleon's troop strength at specific geographical points (latitude and longitude) along his campaign route. This data includes the number of survivors and is categorized by direction, with two levels: "Advance" (A) and "Retreat" (R). Additionally, it is grouped based on the three generals who commanded different portions of Napoleon's troops.
@@ -304,7 +305,8 @@ plot_temp <- ggplot(Minard$temp, aes(long, temp)) +
   geom_text_repel(aes(label=label), size=2.5)
 ```
 Suppressing the horizontal axis tick marks and labels to make it look as close to the original as possible
-```{r label-me-8}
+
+```{r label-me-8, fig.height=5, fig.width=12}
 
 plot_temp <- plot_temp +  
   coord_cartesian(xlim = c(24, 38)) +
@@ -322,7 +324,7 @@ grid.rect(width = .99, height = .99, gp = gpar(lwd = 2, col = "gray", fill = NA)
 
 ```
 
-## 6 - Citation.
+## 6 - Citations.
 https://ggplot2-book.org/facet
 https://www.kaggle.com/code/deepdk/rental-prices-in-sf-tidytuesday/notebook
 https://www.datanovia.com/en/blog/top-r-color-palettes-to-know-for-great-data-visualization/
