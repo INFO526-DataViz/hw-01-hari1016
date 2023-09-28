@@ -11,9 +11,9 @@ toc: true
 
 ```{r label-me-1}
 library(ggplot2)
-library(dsbox)
-library("viridis")
+library(viridis)
 library(dplyr)
+library(dsbox)
 
 accidents <- accidents |>
   mutate(
@@ -75,23 +75,25 @@ ggplot(
   )
 
 # b)
-ggplot(data = nyc_marathon, aes(x = time, color = division)) +
+ggplot(data = nyc_marathon, aes(y = time, color = division)) +
   geom_boxplot() +
-  facet_wrap(~division, ncol = 1) +
+  facet_wrap(~division) +
   scale_color_manual(values = c("green2", "deepskyblue3")) +
   labs(
-    x = "Marathon time",
+    x = "Gender",
+    y = "Marathon time",
     color = "division",
     title = "Boxplot of marathon time for men and women"
   )
 # From the above plots, it is clear that the median, minimum time taken and maximum time taken is greater for women when compared to men. We can also say that the standard deviation of women is little bit higher that men because the box plot is slightly spread out for women.
 
 # c)
-ggplot(data = nyc_marathon, aes(x = time, color = division)) +
+ggplot(data = nyc_marathon, aes(y = time, color = division)) +
   geom_boxplot() +
   scale_color_manual(values = c("green2", "deepskyblue3")) +
   labs(
-    x = "Marathon time",
+    x = "Gender",
+    y = "Marathon time",
     color = "division",
     title = "Boxplot of marathon time for men and women"
   )
@@ -102,7 +104,6 @@ ggplot(data = nyc_marathon, aes(x = time, color = division)) +
 # d)
 ggplot(data = nyc_marathon, aes(x = year, y = time, color = division)) +
   geom_point() +
-  facet_wrap(~division) +
   scale_color_manual(values = c("green2", "deepskyblue3")) +
   labs(
     x = "Years",
@@ -110,22 +111,40 @@ ggplot(data = nyc_marathon, aes(x = year, y = time, color = division)) +
     color = "division",
     title = "Timeseries plot of marathon time for men and women"
   )
-
+# In the boxplots above we can only see the distribution of the data, but using this time series plot, we can also visualize the trend in the data.  
 
 ```
 
 ## 3 - US counties
 
 a) The given code tries to make a box plot and a scatter plot in a single plot. Combining a scatter plot and a box plot on the same plot may not provide meaningful visualizations since they typically use different scales and representations. Moreover, the x and y axes for both the plots represent different data, making it impossible to be represented in a single plot.
+```{r label-me-9}
+ggplot(county) +
+  geom_point(aes(x = median_edu, y = median_hh_income)) +
+  geom_boxplot(aes(x = smoking_ban, y = pop2017))
+
+```
 
 b) Since the poverty level is represented by the y-axis, it would be better to have longer y-axis to when compared to x-axis. Clearly, the second plot makes it easier to compare the poverty levels across people from different median education levels because here the plots are faceted across the columns giving enough space for the y-axis and here the vertical scales are aligned unlike the first graph which is faceted across rows, making it difficult to view the data distribution across the y-axis(poverty level).
 The data is well distributed across the y-axis in the second graph, and it is well distributed across the x-axis in the first graph. Since our focus is on the y-axis, the second graph is preffered over the first.
 Accordingly, if we were to compare the home ownership rate instead of the poverty level, then the first graph would be preffered. 
 So if we give more importance to the data mapped to the y-axis, the faceting should be done across columns and if we give more importance to the data mapped to the x-axis, the faceting should be done across rows.
+```{r label-me-10}
+ggplot(county %>% filter(!is.na(median_edu))) + 
+  geom_point(aes(x = homeownership, y = poverty)) + 
+  facet_grid(median_edu ~ .)
 
+ggplot(county %>% filter(!is.na(median_edu))) + 
+  geom_point(aes(x = homeownership, y = poverty)) + 
+  facet_grid(. ~ median_edu)
+```
 c)
-```{r label-me-3}
+```{r label-me-3, fig.height=10, fig.width=8}
 library(ggpubr)
+library(grid)
+library(gridExtra)
+
+
 a <- ggplot(county, aes(x = homeownership, y = poverty)) + 
   geom_point() + 
   labs(
@@ -184,11 +203,8 @@ h <- ggplot(county, aes(x = homeownership, y = poverty)) +
     title = "Plot H"
   ) 
 
-ggarrange(a, b, c ,d, 
-          ncol = 2, nrow = 2)
 
-ggarrange(e, f, g, h,
-          ncol = 2, nrow = 2)
+grid.arrange(a, b, c ,d, e, f, g, h, ncol=2, nrow = 4)
 ```
 
 ## 4 - Rental apartments in SF
@@ -243,15 +259,17 @@ We can also infer that CCSF has the lowest price per bedroom over the years and 
 
 
 ## 5 - Napoleon's march.
-The dataset provides information regarding Napoleon's troop strength at specific geographical points (latitude and longitude) along his campaign route. This data includes the number of survivors and is categorized by direction, with two levels: "Advance" (A) and "Retreat" (R). Additionally, it is grouped based on the three generals who commanded different portions of Napoleon's troops.
 
-The graph comprises two distinct plots arranged one above the other, a plot displaying troop strength, represented by (x, y) coordinates, where 'x' corresponds to latitude and 'y' corresponds to longitude and a separate plot showcasing temperature data, with coordinates involving temperature (temp) and longitude (long).
-And the graph of troop strength has two layers, a path connecting the (x, y) coordinates, with the width of the path being proportional to the number of survivors at each point, text labels on the map that correspond to the cities mentioned in the dataset, which can be found in the 'Minard.cities' dataset.
-Here I have used geom_path() to plot the path and mapped the size attribute to survivors so that the width of the path will represent the troop strength at that point.
-I have mapped the color to directions to differentiate between advance and retreat.
-I used a color picker to find the hex code of the color closest to the original
 
 ```{r label-me-5}
+# The dataset provides information regarding Napoleon's troop strength at specific geographical points (latitude and longitude) along his campaign route. This data includes the number of survivors and is categorized by direction, with two levels: "Advance" (A) and "Retreat" (R). Additionally, it is grouped based on the three generals who commanded different portions of Napoleon's troops.
+
+# The graph comprises two distinct plots arranged one above the other, a plot displaying troop strength, represented by (x, y) coordinates, where 'x' corresponds to latitude and 'y' corresponds to longitude and a separate plot showcasing temperature data, with coordinates involving temperature (temp) and longitude (long).
+# And the graph of troop strength has two layers, a path connecting the (x, y) coordinates, with the width of the path being proportional to the number of survivors at each point, text labels on the map that correspond to the cities mentioned in the dataset, which can be found in the 'Minard.cities' dataset.
+# Here I have used geom_path() to plot the path and mapped the size attribute to survivors so that the width of the path will represent the troop strength at that point.
+# I have mapped the color to directions to differentiate between advance and retreat.
+# I used a color picker to find the hex code of the color closest to the original
+
 library(ggplot2)
 library(scales)        # additional formatting for scales
 library(grid)          # combining plots
@@ -272,11 +290,10 @@ plot_troops <-ggplot(Minard$troops, aes(long, lat)) +
              breaks=breaks, labels=scales::comma(breaks)) +
   scale_color_manual("Direction", 
                      values = c("#EED7B2", "#1F1A1B"), 
-                     labels=c("Advance", "Retreat")) 
-```
-Since the original plot doesn't have legends, labels and scales for the horizontal and vertical axes, I have dropped them and used thteme_void() to get rid of the grey background and grids.
-I used geom_point() to plot city locations, and/or geom_text_repel() to plot their names from the cities datset.
-```{r label-me-6}
+                     labels=c("Advance", "Retreat"))
+
+# Since the original plot doesn't have legends, labels and scales for the horizontal and vertical axes, I have dropped them and used thteme_void() to get rid of the grey background and grids.
+# I used geom_point() to plot city locations, and/or geom_text_repel() to plot their names from the cities datset.
 
 plot_troops <- plot_troops + labs(x = NULL, y = NULL) + 
   theme_void() + 
@@ -287,14 +304,13 @@ plot_troops <- plot_troops + labs(x = NULL, y = NULL) +
   labs(
     title = "Napolean's march"
   )
-```
-Temperature plot
 
-It is the plot of temperature against longitude on the path of the retreat.
-This can also be constructed using geon_path and geom_path to highlight the points.
-In Minard’s graph, he labeled each point using the temperature and the date, in a particular format. So i have constructed on my own.
+# Temperature plot
+# 
+# It is the plot of temperature against longitude on the path of the retreat.
+# This can also be constructed using geon_path and geom_path to highlight the points.
+# In Minard’s graph, he labeled each point using the temperature and the date, in a particular format. So i have constructed on my own.
 
-```{r label-me-7}
 knitr::opts_chunk$set(
   fig.height=1.2, fig.width=10
 )
@@ -305,8 +321,11 @@ plot_temp <- ggplot(Minard$temp, aes(long, temp)) +
   geom_path(color="grey", size=1.5) +
   geom_point(size=1) +
   geom_text_repel(aes(label=label), size=2.5)
+
+# Suppressing the horizontal axis tick marks and labels to make it look as close to the original as possible
+
 ```
-Suppressing the horizontal axis tick marks and labels to make it look as close to the original as possible
+
 
 ```{r label-me-8, fig.height=5, fig.width=12}
 
